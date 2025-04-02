@@ -1,211 +1,381 @@
-# Guia de Uso do Sistema API Clima
+# Guia Rápido do Sistema API Clima
 
-Este documento contém instruções detalhadas para instalar, configurar e executar o Sistema API Clima.
+Este guia oferece instruções passo a passo para começar a usar o Sistema API Clima rapidamente. Siga os exemplos práticos para configurar, executar e aproveitar os dados climáticos.
 
-## Instalação
+## 🚀 Primeiros Passos
+
+### Instalação em 5 minutos
 
 ```bash
-# Clonar o repositório
+# 1. Clone o repositório
 git clone https://github.com/seu-usuario/sistema_api_clima.git
 cd sistema_api_clima
 
-# Criar ambiente virtual
-python -m venv .venv
+# 2. Configure o ambiente
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# ou
+venv\Scripts\activate     # Windows
 
-# Ativar ambiente virtual
-# Linux/Mac
-source .venv/bin/activate
-# Windows
-.venv\Scripts\activate
-
-# Instalar dependências
+# 3. Instale as dependências
 pip install -r requirements.txt
-```
 
-## Configuração das APIs
-
-O sistema utiliza duas APIs de dados climáticos:
-
-### OpenWeather (Principal)
-
-1. Crie uma conta em [OpenWeather](https://openweathermap.org/)
-2. Adquira uma chave de API gratuita no painel do usuário
-3. Defina a variável de ambiente:
-
-```bash
+# 4. Configure suas chaves de API (obrigatório)
 # Linux/Mac
 export OPENWEATHER_API_KEY="sua_chave_aqui"
-
-# Windows (PowerShell)
+# ou Windows (PowerShell)
 $env:OPENWEATHER_API_KEY="sua_chave_aqui"
 
-# Windows (CMD)
-set OPENWEATHER_API_KEY=sua_chave_aqui
-```
-
-### INMET (Reserva)
-
-1. Acesse o [Portal do INMET](https://portal.inmet.gov.br/)
-2. Solicite acesso à API de dados (se necessário)
-3. Defina a variável de ambiente:
-
-```bash
-# Linux/Mac
-export INMET_API_KEY="sua_chave_aqui"
-
-# Windows (PowerShell)
-$env:INMET_API_KEY="sua_chave_aqui"
-
-# Windows (CMD)
-set INMET_API_KEY=sua_chave_aqui
-```
-
-## Configuração do Sistema
-
-### Gerar Configuração Padrão
-
-Para gerar um arquivo de configuração padrão:
-
-```bash
+# 5. Gere a configuração padrão
 python -m src.main --gerar-config
-```
 
-### Editar Configuração
-
-Edite o arquivo `config/config.yaml` conforme suas necessidades:
-
-```yaml
-geral:
-  # Modo de API: "principal" (OpenWeather), "reserva" (INMET) ou "ambas"
-  modo_api: "principal"
-  
-  # Formato de saída: "csv", "json" ou "parquet"
-  formato_saida: "csv"
-  
-  arquivo_saida:
-    # Tipo de arquivo: "separado" (por localidade) ou "concatenado" (todas)
-    tipo: "separado"
-    # Diretório onde os arquivos serão salvos
-    diretorio: "dados"
-
-# Lista de localidades a serem monitoradas
-localidades:
-  - nome: "São Paulo"
-    latitude: -23.5505
-    longitude: -46.6333
-  - nome: "Rio de Janeiro"
-    latitude: -22.9068
-    longitude: -43.1729
-
-# Variáveis climáticas a serem coletadas
-variaveis:
-  - nome: "temperatura"
-    unidade: "celsius"  # ou "fahrenheit"
-    ativo: true
-  - nome: "chuva"
-    unidade: "mm"
-    ativo: true
-  - nome: "umidade"
-    unidade: "percentual"
-    ativo: true
-
-# Configurações de frequência
-frequencia:
-  # Tipo de frequência: "diaria" ou "mensal"
-  tipo: "diaria"
-  
-  # Configuração para dados históricos
-  historico:
-    # Ativar coleta de dados históricos?
-    ativo: false
-    # Número de anos para dados históricos
-    anos: 5
-```
-
-## Execução do Sistema
-
-### Execução Básica
-
-```bash
+# 6. Execute pela primeira vez
 python -m src.main
 ```
 
-### Opções de Linha de Comando
+## 🔧 Exemplos Práticos
 
-Sobrescrever configurações via linha de comando:
+### Exemplo 1: Monitorar São Paulo e Rio de Janeiro (dados diários)
 
-```bash
-# Especificar arquivo de configuração personalizado
-python -m src.main -c minha_config.yaml
+1. Edite o arquivo `config/config.yaml`:
+   ```yaml
+   localidades:
+     - nome: "São Paulo"
+       latitude: -23.5505
+       longitude: -46.6333
+     - nome: "Rio de Janeiro"
+       latitude: -22.9068
+       longitude: -43.1729
+   ```
 
-# Usar modo de API específico
-python -m src.main --modo-api reserva
+2. Execute:
+   ```bash
+   python -m src.main --frequencia diaria
+   ```
 
-# Alterar formato de saída
-python -m src.main --formato-saida json
+3. Verifique os resultados:
+   ```bash
+   ls dados/
+   # Você verá arquivos como:
+   # clima_sao_paulo_diario.csv
+   # clima_rio_de_janeiro_diario.csv
+   ```
 
-# Alterar frequência
-python -m src.main --frequencia mensal
+### Exemplo 2: Análise histórica mensal do clima em Brasília
 
-# Ativar dados históricos
-python -m src.main --historico --anos-historico 10
+1. Configure apenas Brasília no arquivo `config/config.yaml`:
+   ```yaml
+   localidades:
+     - nome: "Brasília"
+       latitude: -15.7801
+       longitude: -47.9292
+   ```
 
-# Aumentar nível de detalhes do log
-python -m src.main -v
-```
+2. Execute com dados históricos:
+   ```bash
+   python -m src.main --frequencia mensal --historico --anos-historico 5
+   ```
 
-## Dados Gerados
+3. Analise os resultados:
+   ```python
+   import pandas as pd
+   import matplotlib.pyplot as plt
 
-Os dados são salvos no diretório especificado na configuração (padrão: `dados/`).
+   # Carregue os dados
+   df = pd.read_csv('dados/clima_brasilia_mensal.csv')
+   
+   # Visualize a temperatura média por mês
+   df['ano_mes'] = pd.to_datetime(df['ano_mes'] + '-01')
+   plt.figure(figsize=(12, 6))
+   plt.plot(df['ano_mes'], df['temperatura_media'])
+   plt.title('Temperatura Média Mensal em Brasília')
+   plt.grid(True)
+   plt.xticks(rotation=45)
+   plt.tight_layout()
+   plt.show()
+   ```
 
-### Formatos de Saída
+### Exemplo 3: Comparação entre regiões (modo JSON)
 
-- **CSV**: Formato tabular compatível com Excel, pandas e outras ferramentas
-- **JSON**: Formato hierárquico para integração com aplicações web
-- **Parquet**: Formato colunar otimizado para análise e machine learning
+1. Configure múltiplas regiões no `config/config.yaml`:
+   ```yaml
+   localidades:
+     - nome: "Recife"
+       latitude: -8.0584
+       longitude: -34.8848
+     - nome: "Porto Alegre"
+       latitude: -30.0277
+       longitude: -51.2287
+   ```
 
-### Estrutura dos Dados
+2. Execute com saída JSON:
+   ```bash
+   python -m src.main --formato-saida json --tipo-arquivo concatenado
+   ```
 
-Os dados incluem:
+3. Analise os resultados:
+   ```python
+   import json
+   import pandas as pd
+   
+   # Carregue os dados
+   with open('dados/clima_todas_localidades_diario.json', 'r') as f:
+       dados = json.load(f)
+   
+   # Converta para DataFrame
+   df = pd.DataFrame(dados)
+   
+   # Compare a temperatura entre cidades
+   df_pivot = df.pivot(index='data', columns='localidade', values='temperatura_media')
+   df_pivot.plot(figsize=(12, 6), title='Comparação de Temperatura')
+   plt.grid(True)
+   plt.show()
+   ```
 
-- **temperatura**: média, mínima, máxima (Celsius ou Fahrenheit)
-- **chuva**: precipitação, probabilidade
-- **umidade**: média ou atual
-- **metadados**: data, localidade, origem dos dados
+## 📊 Visualizações Rápidas
 
-## Uso com Machine Learning
-
-Os dados são formatados para uso direto em modelos de ML:
+### Dashboard Básico com Dados Diários
 
 ```python
 import pandas as pd
-from src.processadores.processador_diario import ProcessadorDiario
+import matplotlib.pyplot as plt
+
+# Carregue os dados
+df = pd.read_csv('dados/clima_sao_paulo_diario.csv')
+
+# Configure o dashboard
+fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+fig.suptitle('Dashboard Climático - São Paulo', fontsize=16)
+
+# Gráfico 1: Temperatura (min, média, max)
+df.plot(x='data', y=['temperatura_minima', 'temperatura_media', 'temperatura_maxima'], 
+        ax=axes[0,0], title='Temperaturas')
+axes[0,0].grid(True)
+
+# Gráfico 2: Precipitação
+df.plot(x='data', y='chuva_precipitacao', kind='bar', ax=axes[0,1], 
+        title='Precipitação (mm)', color='blue')
+axes[0,1].grid(True)
+
+# Gráfico 3: Umidade
+df.plot(x='data', y='umidade_media', ax=axes[1,0], title='Umidade (%)', color='green')
+axes[1,0].grid(True)
+
+# Gráfico 4: Amplitude térmica
+df.plot(x='data', y='amplitude_termica', kind='bar', ax=axes[1,1], 
+        title='Amplitude Térmica (°C)', color='red')
+axes[1,1].grid(True)
+
+plt.tight_layout()
+plt.subplots_adjust(top=0.9)
+plt.show()
+```
+
+## 🛠️ Tarefas de Manutenção Comuns
+
+### Atualização Diária Automatizada
+
+Arquivo `atualizar_clima.sh`:
+```bash
+#!/bin/bash
+cd /caminho/para/sistema_api_clima
+source venv/bin/activate
+export OPENWEATHER_API_KEY="sua_chave_aqui"
+python -m src.main
+```
+
+Configure no crontab (Linux/Mac):
+```bash
+0 6 * * * /caminho/para/atualizar_clima.sh >> /caminho/para/logs/clima.log 2>&1
+```
+
+### Limpeza de Dados Antigos
+
+Script `limpar_dados_antigos.py`:
+```python
+"""Script para manter apenas os dados dos últimos X meses."""
+import os
+import glob
+import pandas as pd
+from datetime import datetime, timedelta
+
+# Configurações
+DIRETORIO = 'dados'
+MESES_MANTER = 6
+
+# Data limite
+data_limite = (datetime.now() - timedelta(days=30*MESES_MANTER)).strftime('%Y-%m-%d')
+
+# Processa arquivos CSV
+for arquivo in glob.glob(f'{DIRETORIO}/*.csv'):
+    try:
+        # Lê o arquivo
+        df = pd.read_csv(arquivo)
+        
+        # Verifica se tem coluna de data
+        if 'data' in df.columns:
+            # Filtra para manter apenas dados recentes
+            df_filtrado = df[df['data'] >= data_limite]
+            
+            # Se houver redução, salva o arquivo
+            if len(df_filtrado) < len(df):
+                df_filtrado.to_csv(arquivo, index=False)
+                print(f"Arquivo {arquivo} atualizado. Removidos {len(df) - len(df_filtrado)} registros antigos.")
+        
+    except Exception as e:
+        print(f"Erro ao processar {arquivo}: {str(e)}")
+```
+
+## 🔍 Dicas e Truques
+
+### Aumento de Performance
+
+Para coletar dados de muitas localidades mais rapidamente:
+
+```bash
+# Divida em grupos e execute em paralelo
+python -m src.main --config config/grupo1.yaml &
+python -m src.main --config config/grupo2.yaml &
+```
+
+### Alternância entre APIs
+
+Se estiver próximo do limite de requisições da API OpenWeather:
+
+```bash
+# Manhã: use OpenWeather
+python -m src.main --modo-api principal
+
+# Tarde: use INMET
+python -m src.main --modo-api reserva
+```
+
+### Formato para Ciência de Dados
+
+Para usar em projetos de machine learning:
+
+```bash
+# Formato Parquet é mais eficiente
+python -m src.main --formato-saida parquet --tipo-arquivo concatenado
+```
+
+## 📱 Notificações de Alerta
+
+Script para alertar sobre condições extremas:
+```python
+import pandas as pd
+import requests
+
+# Carregar os últimos dados
+df = pd.read_csv('dados/clima_sao_paulo_diario.csv')
+ultimo_dia = df.iloc[-1]
+
+# Verificar condições de alerta
+alertas = []
+if ultimo_dia['temperatura_maxima'] > 35:
+    alertas.append(f"ALERTA DE CALOR: {ultimo_dia['temperatura_maxima']}°C")
+if ultimo_dia['chuva_precipitacao'] > 50:
+    alertas.append(f"ALERTA DE CHUVA INTENSA: {ultimo_dia['chuva_precipitacao']}mm")
+
+# Enviar alerta (exemplo com webhook)
+if alertas:
+    mensagem = "\n".join(alertas)
+    requests.post('https://seu-webhook.exemplo/alertas', 
+                 json={'text': f"Alertas climáticos: {mensagem}"})
+```
+
+## 🔄 Integração com Outras Ferramentas
+
+### Exportação para Google Sheets
+
+```python
+import pandas as pd
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
 # Carregar dados
 df = pd.read_csv('dados/clima_sao_paulo_diario.csv')
 
-# Alternativamente, usar os processadores para preparar os dados
-config = {...}  # Configuração
-processador = ProcessadorDiario(config)
-df_ml = processador.preparar_para_ml(dados)
+# Configurar credenciais
+scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+credentials = ServiceAccountCredentials.from_json_keyfile_name('credentials.json', scope)
+gc = gspread.authorize(credentials)
 
-# Agora os dados estão prontos para alimentar modelos
-# ...
+# Abrir planilha
+sheet = gc.open('Monitoramento Climático').worksheet('Dados Diários')
+
+# Limpar planilha
+sheet.clear()
+
+# Adicionar cabeçalho
+sheet.append_row(df.columns.tolist())
+
+# Adicionar dados
+sheet.append_rows(df.values.tolist())
 ```
 
-## Troubleshooting
+## 🔧 Resolução Rápida de Problemas
 
-### Erros de API
+### Problema: "Nenhum dado encontrado"
 
-- **Chave inválida**: Verifique as variáveis de ambiente
-- **Falha na API principal**: Configure `modo_api: "reserva"` ou `modo_api: "ambas"`
-- **Limite de requisições**: Algumas APIs têm limites de uso gratuito
+Solução rápida:
+```bash
+# Verifique se as chaves de API estão configuradas
+echo $OPENWEATHER_API_KEY
 
-### Erros de Dados
+# Teste a conexão básica com a API
+curl "https://api.openweathermap.org/data/2.5/weather?lat=-23.5505&lon=-46.6333&appid=$OPENWEATHER_API_KEY"
 
-- **Sem dados**: Verifique as coordenadas das localidades
-- **Dados incompletos**: Algumas APIs têm limitações em dados históricos
+# Tente usar ambas as APIs
+python -m src.main --modo-api ambas -v
+```
 
-## Suporte
+### Problema: "Arquivo não pode ser criado"
 
-Para dúvidas ou problemas, abra uma issue no repositório do GitHub.
+Solução rápida:
+```bash
+# Verifique se o diretório de dados existe
+mkdir -p dados
+
+# Verifique permissões
+chmod 755 dados
+
+# Use um caminho alternativo
+python -m src.main --diretorio-saida ./tmp_dados
+```
+
+## ⚙️ Integrações Avançadas (Exemplos)
+
+### Webhook para Notificação de Coleta
+
+```python
+import requests
+import json
+import os
+from datetime import datetime
+
+def notificar_coleta(arquivos, status="sucesso"):
+    """Notifica uma API externa sobre a coleta de dados."""
+    webhook_url = os.environ.get('WEBHOOK_URL')
+    if not webhook_url:
+        return
+    
+    payload = {
+        "status": status,
+        "timestamp": datetime.now().isoformat(),
+        "arquivos": arquivos,
+        "sistema": "API Clima"
+    }
+    
+    try:
+        requests.post(
+            webhook_url,
+            data=json.dumps(payload),
+            headers={"Content-Type": "application/json"}
+        )
+    except Exception as e:
+        print(f"Erro ao notificar: {str(e)}")
+
+# Uso:
+# notificar_coleta(['clima_sao_paulo_diario.csv', 'clima_rio_de_janeiro_diario.csv'])
+```
