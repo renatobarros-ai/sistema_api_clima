@@ -1,0 +1,1 @@
+"""Pacote de processadores de dados climáticos."""

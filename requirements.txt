@@ -1,0 +1,18 @@
+# Pacotes essenciais
+pyyaml>=6.0
+requests>=2.28.0
+pandas>=2.0.0
+python-dotenv>=1.0.0
+
+# Formatos de saída
+pyarrow>=10.0.0  # Suporte para Parquet
+
+# Testes
+pytest>=7.0.0
+pytest-cov>=4.0.0
+
+# Desenvolvimento
+black>=23.0.0
+isort>=5.0.0
+flake8>=6.0.0
+mypy>=1.0.0

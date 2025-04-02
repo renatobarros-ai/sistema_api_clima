@@ -1,0 +1,54 @@
+# Configuração do Sistema de API Clima
+
+# Configurações gerais
+geral:
+  modo_api: "principal"  # "principal" (OpenWeather) ou "reserva" (INMET) ou "ambas"
+  formato_saida: "csv"   # "csv", "json", "parquet"
+  arquivo_saida:
+    tipo: "separado"     # "separado" (por localidade) ou "concatenado" (todas localidades)
+    diretorio: "dados"
+
+# Configurações de localidades
+localidades:
+  - nome: "São Paulo"
+    latitude: -23.5505
+    longitude: -46.6333
+  - nome: "Rio de Janeiro"
+    latitude: -22.9068
+    longitude: -43.1729
+  - nome: "Brasília"
+    latitude: -15.7801
+    longitude: -47.9292
+
+# Variáveis climáticas a serem coletadas
+variaveis:
+  - nome: "temperatura"
+    unidade: "celsius"
+    ativo: true
+  - nome: "chuva"
+    unidade: "mm"
+    ativo: true
+  - nome: "umidade"
+    unidade: "percentual"
+    ativo: true
+
+# Configurações de frequência
+frequencia:
+  tipo: "diaria"  # "diaria" ou "mensal"
+  historico:
+    ativo: false
+    anos: 5        # Número de anos para dados históricos
+
+# Configurações das APIs
+apis:
+  openweather:
+    chave: "${OPENWEATHER_API_KEY}"  # Usar variável de ambiente
+    base_url: "https://api.openweathermap.org/data/2.5"
+    timeout: 30
+    tentativas: 3
+  
+  inmet:
+    chave: "${INMET_API_KEY}"  # Usar variável de ambiente
+    base_url: "https://apitempo.inmet.gov.br/api"
+    timeout: 30
+    tentativas: 3

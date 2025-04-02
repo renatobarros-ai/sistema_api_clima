@@ -1,0 +1,1 @@
+"""Pacote de integração com APIs de dados climáticos."""
